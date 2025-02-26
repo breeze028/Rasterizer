@@ -11,7 +11,7 @@
 #include <omp.h>
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4244)
+#pragma warning(disable: 4244 4849 4018)
 #endif
 
 constexpr uint32_t SCREEN_WIDTH  = 4 * 960;
@@ -736,11 +736,9 @@ void generateCircleTexture(ColorBuffer& texture, uint32_t radius) {
     }
 }
 
-// 简化的伪随机噪声函数（可以用更复杂的噪声库替换）
 float randomNoise(float x, float y) {
-    // 改进的伪随机噪声生成，归一化到 [0, 1]
     float value = std::sin(x * 12.9898f + y * 78.233f) * 43758.5453f;
-    return value - std::floor(value); // 结果在 [0, 1) 内
+    return value - std::floor(value);
 }
 
 void generateWoodTexture(ColorBuffer& texture, float ringSpacing, float noiseStrength, float directionX, float directionY) {
@@ -802,15 +800,17 @@ void gaussianFilter(ColorBuffer& buffer) {
     float weight[] = { 0.4026f, 0.2442f, 0.0545f };
 
     ColorBuffer new_buffer(buffer.width + 4, buffer.height + 4);
-    for (uint32_t y = 2; y < buffer.height + 2; y++)
-        for (uint32_t x = 2; x < buffer.width + 2; x++)
+    #pragma omp parallel for collapse(2)
+    for (int y = 2; y < buffer.height + 2; y++)
+        for (int x = 2; x < buffer.width + 2; x++)
             new_buffer.getColor(x, y) = buffer.getColor(x - 2, y - 2);
     
     // X-axis
-    for (uint32_t y = 2; y < buffer.height + 2; y++) {
-        for (uint32_t x = 2; x < buffer.width + 2; x++) {
+    #pragma omp parallel for collapse(2)
+    for (int y = 2; y < buffer.height + 2; y++) {
+        for (int x = 2; x < buffer.width + 2; x++) {
             Vec3 sum = Vec3(new_buffer.getColor(x, y) * weight[0]);
-            for (uint32_t i = 1; i < 3; i++) {
+            for (int i = 1; i < 3; i++) {
                 sum += Vec3(new_buffer.getColor(x + i, y) * weight[i]);
                 sum += Vec3(new_buffer.getColor(x - i, y) * weight[i]);
             }
@@ -819,10 +819,11 @@ void gaussianFilter(ColorBuffer& buffer) {
     }
 
     // Y-axis
-    for (uint32_t y = 2; y < buffer.height + 2; y++) {
-        for (uint32_t x = 2; x < buffer.width + 2; x++) {
+    #pragma omp parallel for collapse(2)
+    for (int y = 2; y < buffer.height + 2; y++) {
+        for (int x = 2; x < buffer.width + 2; x++) {
             Vec3 sum = Vec3(new_buffer.getColor(x, y) * weight[0]);
-            for (uint32_t i = 1; i < 3; i++) {
+            for (int i = 1; i < 3; i++) {
                 sum += Vec3(new_buffer.getColor(x, y + i) * weight[i]);
                 sum += Vec3(new_buffer.getColor(x, y - i) * weight[i]);
             }
@@ -830,8 +831,9 @@ void gaussianFilter(ColorBuffer& buffer) {
         }
     }
 
-    for (uint32_t y = 2; y < buffer.height + 2; y++)
-        for (uint32_t x = 2; x < buffer.width + 2; x++)
+    #pragma omp parallel for collapse(2)
+    for (int y = 2; y < buffer.height + 2; y++)
+        for (int x = 2; x < buffer.width + 2; x++)
             buffer.getColor(x - 2, y - 2) = new_buffer.getColor(x, y);
 }
 
@@ -849,8 +851,9 @@ void nearestScaling(ColorBuffer& buffer, float scale_width, float scale_height) 
     uint32_t dst_height = static_cast<uint32_t>(src_height * scale_height);
 
     ColorBuffer new_buffer(dst_width, dst_height);
-    for (uint32_t y = 0; y < dst_height; y++) {
-        for (uint32_t x = 0; x < dst_width; x++) {
+    #pragma omp parallel for collapse(2)
+    for (int y = 0; y < dst_height; y++) {
+        for (int x = 0; x < dst_width; x++) {
             uint32_t src_x = clamp(x / scale_width, 0, src_width - 1);
             uint32_t src_y = clamp(y / scale_height, 0, src_height - 1);
             new_buffer.getColor(x, y) = buffer.getColor(src_x, src_y);
@@ -858,8 +861,9 @@ void nearestScaling(ColorBuffer& buffer, float scale_width, float scale_height) 
     }
 
     buffer.resize(dst_width, dst_height);
-    for (uint32_t y = 0; y < dst_height; y++)
-        for (uint32_t x = 0; x < dst_width; x++)
+    #pragma omp parallel for collapse(2)
+    for (int y = 0; y < dst_height; y++)
+        for (int x = 0; x < dst_width; x++)
             buffer.getColor(x, y) = new_buffer.getColor(x, y);
 }
 
@@ -1521,7 +1525,7 @@ void Renderer::render(MaterialType& material, FrameBuffer& frame) {
         v.gl_Position = viewport * v.gl_Position;
     
     // Rasterization & Fragment Shader
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < indices.size(); i += 3) {
         uint32_t idx0 = indices[i];
         uint32_t idx1 = indices[i + 1];
@@ -1536,8 +1540,8 @@ void Renderer::render(MaterialType& material, FrameBuffer& frame) {
         int yMin = std::max(0, std::min(std::min((int)v0.y, (int)v1.y), (int)v2.y));
         int yMax = std::min((int)frame.height - 1, std::max(std::max((int)v0.y, (int)v1.y), (int)v2.y));
 
+        #pragma omp parallel for collapse(2)
         for (int y = yMin; y <= yMax; y++) {
-            #pragma omp parallel for
             for (int x = xMin; x <= xMax; x++) {
                 float lambda1, lambda2, lambda3;
                 computeBarycentricCoords(v0, v1, v2, Vec2(x + 0.5f, y + 0.5f), lambda1, lambda2, lambda3);
@@ -1858,9 +1862,10 @@ int main() {
     // Image Output
     gaussianFilterNTimes(frame.colorBuffers[0], 3);
     nearestScaling(frame.colorBuffers[0], 0.25f, 0.25f);
-    displayImage(frame.colorBuffers[0]);
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> serial_time = end - start;
     std::clog << "execution time: " << serial_time.count() << " seconds\n";
+
+    displayImage(frame.colorBuffers[0]);
 }
