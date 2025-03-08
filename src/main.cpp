@@ -13,7 +13,7 @@ int main(int, char**){
     bool use4xSSAA = true;
 
     // Choose one scene at a time! 
-    box(use4xSSAA);
+    //box(use4xSSAA);
     //rsm_test(use4xSSAA);
-    //pbr_test(use4xSSAA);
+    pbr_test(use4xSSAA);
 }

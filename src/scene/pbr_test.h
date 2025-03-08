@@ -6,7 +6,7 @@
 #include "../material/ssao.h"
 #include "../material/ssr.h"
 #include "../material/standard.h"
-#include "../texture.h"
+#include "../procedural_texture.h"
 
 inline void pbr_test(bool use4xSSAA) {
     uint32_t SCREEN_WIDTH  = use4xSSAA ? 4 * 960 : 960;
@@ -53,7 +53,7 @@ inline void pbr_test(bool use4xSSAA) {
     sphere_depth.lightSpaceMatrix = createPerspectiveMatrix(90, 1, 0.1f, 100) * createLookAtMatrix(light_position, Vec3(0, 0, 0));
 
     renderer.vertex_buffer = std::move(vertex_buffer);
-    renderer.indices = sphere_indices;
+    renderer.index_buffer = sphere_indices;
     renderer.cameraPos = light_position;
     renderer.render(sphere_depth, depth_map);
 
@@ -71,7 +71,7 @@ inline void pbr_test(bool use4xSSAA) {
     cube_depth.lightSpaceMatrix = createPerspectiveMatrix(90, 1, 0.1f, 100) * createLookAtMatrix(light_position, Vec3(0, 0, 0));
 
     renderer.vertex_buffer = std::move(vertex_buffer);
-    renderer.indices = cube_indices;
+    renderer.index_buffer = cube_indices;
     renderer.render(cube_depth, depth_map);
 
     // Shadow Pass : Quad
@@ -88,7 +88,7 @@ inline void pbr_test(bool use4xSSAA) {
     quad_depth.lightSpaceMatrix = createPerspectiveMatrix(90, 1, 0.1f, 100) * createLookAtMatrix(light_position, Vec3(0, 0, 0));
 
     renderer.vertex_buffer = std::move(vertex_buffer);
-    renderer.indices = quad_indices;
+    renderer.index_buffer = quad_indices;
     renderer.render(quad_depth, depth_map);
 
     end = std::chrono::high_resolution_clock::now();
@@ -115,7 +115,7 @@ inline void pbr_test(bool use4xSSAA) {
     sphere_gbuffer.objectID = 0;
 
     renderer.vertex_buffer = std::move(vertex_buffer);
-    renderer.indices = sphere_indices;
+    renderer.index_buffer = sphere_indices;
     renderer.cameraPos = camera_position;
     renderer.render(sphere_gbuffer, g_buffer);
 
@@ -139,7 +139,7 @@ inline void pbr_test(bool use4xSSAA) {
     cube_gbuffer.objectID = 1;
 
     renderer.vertex_buffer = std::move(vertex_buffer);
-    renderer.indices = cube_indices;
+    renderer.index_buffer = cube_indices;
     renderer.render(cube_gbuffer, g_buffer);
 
     // Quad Geometry Pass
@@ -162,7 +162,7 @@ inline void pbr_test(bool use4xSSAA) {
     quad_gbuffer.objectID = 2;
 
     renderer.vertex_buffer = vertex_buffer;
-    renderer.indices = quad_indices;
+    renderer.index_buffer = quad_indices;
     renderer.render(quad_gbuffer, g_buffer);
 
     end = std::chrono::high_resolution_clock::now();
@@ -176,7 +176,7 @@ inline void pbr_test(bool use4xSSAA) {
     ssao.projection = createPerspectiveMatrix(60, (float)SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100);
     
     renderer.vertex_buffer = vertex_buffer;
-    renderer.indices = quad_indices;
+    renderer.index_buffer = quad_indices;
     renderer.render(ssao, ao);
 
     // SSAO-Blur Pass
@@ -185,7 +185,7 @@ inline void pbr_test(bool use4xSSAA) {
     ssao_blur.view = createLookAtMatrix(camera_position, Vec3(0));
 
     renderer.vertex_buffer = vertex_buffer;
-    renderer.indices = quad_indices;
+    renderer.index_buffer = quad_indices;
     renderer.render(ssao_blur, ao_final);
 
     end = std::chrono::high_resolution_clock::now();
@@ -206,10 +206,10 @@ inline void pbr_test(bool use4xSSAA) {
     standard_shading.lightSpaceMatrix = createPerspectiveMatrix(90, 1, 0.1f, 100) * createLookAtMatrix(light_position, Vec3(0, 0, 0));
     standard_shading.depthMaps.push_back(&depth_map);
     standard_shading.pointLights.push_back(light);
-    standard_shading.shadowBias = 0.7f;
+    standard_shading.shadowBias = 1.0f;
 
     renderer.vertex_buffer = vertex_buffer;
-    renderer.indices = quad_indices;
+    renderer.index_buffer = quad_indices;
     renderer.render(standard_shading, frame);
 
     end = std::chrono::high_resolution_clock::now();

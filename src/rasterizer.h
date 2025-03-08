@@ -156,7 +156,7 @@ struct Renderer {
     bool writeDepth = true;
     Vec3 cameraPos;
     std::vector<Vertex> vertex_buffer;
-    std::vector<uint32_t> indices;
+    std::vector<uint32_t> index_buffer;
 };
 
 template <typename MaterialType>
@@ -174,7 +174,7 @@ void Renderer::render(MaterialType& material, FrameBuffer& frame) {
     }
 
     // Back-Face Culling
-    backFaceCulling(vertex_buffer, indices, cameraPos);
+    backFaceCulling(vertex_buffer, index_buffer, cameraPos);
 
     // Viewport Transformation
     Mat4 viewport = createViewportMatrix(frame.width, frame.height);
@@ -183,10 +183,10 @@ void Renderer::render(MaterialType& material, FrameBuffer& frame) {
 
     // Rasterization & Fragment Shader
     #pragma omp parallel for schedule(dynamic)
-    for (int i = 0; i < indices.size(); i += 3) {
-        uint32_t idx0 = indices[i];
-        uint32_t idx1 = indices[i + 1];
-        uint32_t idx2 = indices[i + 2];
+    for (int i = 0; i < index_buffer.size(); i += 3) {
+        uint32_t idx0 = index_buffer[i];
+        uint32_t idx1 = index_buffer[i + 1];
+        uint32_t idx2 = index_buffer[i + 2];
 
         Vec3 v0 = Vec3(v2fs[idx0].gl_Position);
         Vec3 v1 = Vec3(v2fs[idx1].gl_Position);
