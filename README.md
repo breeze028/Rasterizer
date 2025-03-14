@@ -12,7 +12,9 @@ A lightweight C++20 software rasterizer with no third-party dependencies.
 - **Normal Mapping** – Enhances surface detail.
 - **Exponential Fog** – Realistic atmospheric effects.
 - **Shadow Mapping** – Real-time shadow rendering.
-- **Super-Sampling Anti-Aliasing (SSAA)** – High-quality edge smoothing.
+- **Anti-Aliasing** – High-quality edge smoothing.
+  - Super Sampling Anti-Aliasing (SSAA)
+  - Fast Approximate Anti-Aliasing (FXAA)
 - **Performance Optimization** – Utilizes OpenMP and tile-based rendering.
 
 ## Build
@@ -51,8 +53,10 @@ Done.
 ```
 
 ## Sample Scenes
-### box
-<img src="image/box.png" width="500">
+### box(SSAA/FXAA/noAA)
+<img src="image/box_SSAA.png" width="500">
+<img src="image/box_FXAA.png" width="500">
+<img src="image/box_noAA.png" width="500">
 
 ### pbr_test
 <img src="image/pbr_test.png" width="500">
