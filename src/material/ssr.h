@@ -3,6 +3,8 @@
 #include <random>
 #include "common.h"
 
+// https://github.com/RoundedGlint585/ScreenSpaceReflection/blob/master/shaders/SSRFragment.glsl
+
 struct SSRMaterial {
     using V2F = GenericV2F<>;
 

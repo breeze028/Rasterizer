@@ -10,7 +10,7 @@
 
 int main(int, char**){
     // Using 4x SSAA will cost more memory and time.
-    bool use4xSSAA = true;
+    bool use4xSSAA = false;
 
     // Choose one scene at a time! 
     //box(use4xSSAA);

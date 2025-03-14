@@ -18,7 +18,6 @@ struct ColorBuffer {
         m_colorBuffer.clear();
         m_colorBuffer.resize(height, std::vector<Vec4>(width, colorDefault));
     }
-
 public:
     uint32_t width;
     uint32_t height;

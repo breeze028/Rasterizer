@@ -34,9 +34,11 @@ struct GBufferMaterial {
         Vec2 uv = std::get<2>(fs_in.attributes);
 
         if (useNormalMap) {
-            uint32_t coord_u = clamp(uv.x * normalMap->width, 0.0f, normalMap->width - 1);
-            uint32_t coord_v = clamp(uv.y * normalMap->height, 0.0f, normalMap->height - 1);
-            Vec3 normal = Vec3(normalMap->getColor(coord_u, coord_v) * 2 - 1).normalize();
+            // uint32_t coord_u = clamp(uv.x * normalMap->width, 0.0f, normalMap->width - 1);
+            // uint32_t coord_v = clamp(uv.y * normalMap->height, 0.0f, normalMap->height - 1);
+            // Vec3 normal = Vec3(normalMap->getColor(coord_u, coord_v) * 2 - 1).normalize();
+            Vec3 normal = Vec3(texture2D(normalMap, uv.x, uv.y, FILTERMODE::BILINEAR));
+            normal = (normal * 2 - 1).normalize();
             viewSpaceNormal = (normal2View * normal).normalize();
         }
 

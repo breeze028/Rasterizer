@@ -35,9 +35,7 @@ struct DepthMapMaterial {
         Vec3 incidentFlux = light.intensity * light.color * NdotL;
         if (useAlbedoMap) {
             Vec2 uv = std::get<2>(fs_in.attributes);
-            uint32_t coord_u = clamp(uv.x * albedoMap->width, 0.0f, albedoMap->width - 1);
-            uint32_t coord_v = clamp(uv.y * albedoMap->height, 0.0f, albedoMap->height - 1);
-            albedo = Vec3(albedoMap->getColor(coord_u, coord_v));
+            albedo = Vec3(texture2D(albedoMap, uv.x, uv.y, FILTERMODE::BILINEAR));
         }
         Vec3 flux = incidentFlux * albedo / PI;
 

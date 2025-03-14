@@ -255,6 +255,21 @@ inline void rsm_test(bool use4xSSAA) {
     serial_time = end - start;
     std::clog << "Shading Pass:       " << serial_time.count() << " seconds\n";
 
+    if (!use4xSSAA) {
+        FXAAMaterial fxaa;
+        fxaa.frame = &(frame.colorBuffers[0]);
+        fxaa.contrastThreshold = 0.005f;
+        fxaa.relativeThreshold = 0.0f;
+
+        renderer.vertex_buffer = vertex_buffer;
+        renderer.index_buffer = quad_indices;
+        renderer.render(fxaa, frame);
+    
+        end = std::chrono::high_resolution_clock::now();
+        serial_time = end - start;
+        std::clog << "FXAA Pass:          " << serial_time.count() << " seconds\n";
+    }
+
     // Image Output
     if (use4xSSAA) {
         gaussianFilterNTimes(frame.colorBuffers[0], 3);

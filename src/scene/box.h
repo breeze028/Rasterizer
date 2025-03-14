@@ -5,6 +5,7 @@
 #include "../material/gbuffer.h"
 #include "../material/ssao.h"
 #include "../material/ssr.h"
+#include "../material/fxaa.h"
 #include "../material/standard.h"
 #include "../procedural_texture.h"
 
@@ -314,6 +315,21 @@ inline void box(bool use4xSSAA) {
     end = std::chrono::high_resolution_clock::now();
     serial_time = end - start;
     std::clog << "SSR Pass:           " << serial_time.count() << " seconds\n";
+
+    if (!use4xSSAA) {
+        FXAAMaterial fxaa;
+        fxaa.frame = &(frame.colorBuffers[0]);
+        fxaa.contrastThreshold = 0.005f;
+        fxaa.relativeThreshold = 0.0f;
+
+        renderer.vertex_buffer = vertex_buffer;
+        renderer.index_buffer = quad_indices;
+        renderer.render(fxaa, frame);
+    
+        end = std::chrono::high_resolution_clock::now();
+        serial_time = end - start;
+        std::clog << "FXAA Pass:          " << serial_time.count() << " seconds\n";
+    }
 
     // Image Output
     if (use4xSSAA) {

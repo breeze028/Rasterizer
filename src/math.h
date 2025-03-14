@@ -106,8 +106,10 @@ struct Vec2 {
     Vec2(const Vec3& v) : x(v.x), y(v.y) {}
 
     Vec2 operator+(const Vec2& v) const { return { x + v.x, y + v.y }; }
+    Vec2 operator-(const Vec2& v) const { return { x - v.x, y - v.y }; }
     Vec2 operator*(float scalar) const { return { x * scalar, y * scalar }; }
     Vec2 operator/(float scalar) const { return *this * (1 / scalar); }
+    Vec2 operator-() const { return Vec2(-x, -y); }
 };
 
 Vec3::Vec3(const Vec4& v) : x(v.x), y(v.y), z(v.z) {}
@@ -118,6 +120,10 @@ Vec3 operator+(float scalar, const Vec3& vec) {
 
 Vec3 operator-(float scalar, const Vec3& vec) {
     return { scalar - vec.x, scalar - vec.y, scalar - vec.z };
+}
+
+Vec2 operator*(float scalar, const Vec2& vec) {
+    return { scalar * vec.x, scalar * vec.y };
 }
 
 Vec3 operator*(float scalar, const Vec3& vec) {

@@ -38,9 +38,10 @@ struct StandardMaterial {
         Vec3 albedo;
         if (albedoMap.count(objectID)) {
             ColorBuffer* albedoTexture = albedoMap[objectID];
-            uint32_t coord_u = clamp(u * albedoTexture->width, 0.0f, albedoTexture->width - 1);
-            uint32_t coord_v = clamp(v * albedoTexture->height, 0.0f, albedoTexture->height - 1);
-            albedo = Vec3(albedoTexture->getColor(coord_u, coord_v));
+            // uint32_t coord_u = clamp(u * albedoTexture->width, 0.0f, albedoTexture->width - 1);
+            // uint32_t coord_v = clamp(v * albedoTexture->height, 0.0f, albedoTexture->height - 1);
+            // albedo = Vec3(albedoTexture->getColor(coord_u, coord_v));
+            albedo = Vec3(texture2D(albedoTexture, u, v, FILTERMODE::BILINEAR));
         }
         else {
             albedo = Vec3(gbuffer->getColori(1, x, y));

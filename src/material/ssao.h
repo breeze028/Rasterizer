@@ -4,7 +4,8 @@
 #include "common.h"
 
 struct SSAOMaterial {
-    using V2F = GenericV2F<>;
+    // 0: uv
+    using V2F = GenericV2F<Vec2>;
 
     SSAOMaterial() : randomFloats(std::uniform_real_distribution<float>(0.0f, 1.0f)) {
         generateSampleKernel();
@@ -15,6 +16,9 @@ struct SSAOMaterial {
         V2F o;
         o.gl_Position = Vec4(i.position, 1);
         o.gl_ZCamera = 1;
+
+        // Vec2 uv
+        std::get<0>(o.attributes) = i.uv;
         return o;
     }
 
@@ -23,6 +27,7 @@ struct SSAOMaterial {
         float radius = 0.5f;
         float bias = 0.0f;
 
+        Vec2 uv = std::get<0>(fs_in.attributes);
         uint32_t x = fs_in.gl_FragCoord.x;
         uint32_t y = fs_in.gl_FragCoord.y;
 
@@ -51,9 +56,7 @@ struct SSAOMaterial {
                 continue;
             }
 
-            uint32_t u = clamp(ndc.x * gbuffer->width, 0.0f, static_cast<float>(gbuffer->width - 1));
-            uint32_t v = clamp(ndc.y * gbuffer->height, 0.0f, static_cast<float>(gbuffer->height - 1));
-            float sampleDepth = gbuffer->getColori(2, u, v).z;
+            float sampleDepth = texture2D(&(gbuffer->colorBuffers[2]), ndc.x, ndc.y, FILTERMODE::BILINEAR).z;
             float rangeCheck = smoothstep(0.0f, 1.0f, radius / (abs(fragPos.z - sampleDepth) + 1e-7));
             occlusion += (sampleDepth <= samplePos.z + bias ? 1.0f : 0.0f) * rangeCheck;
         }
