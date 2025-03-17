@@ -41,14 +41,14 @@ The program uses std::cout to output in PPM (P3) format and outputs to a .ppm fi
 Using 4x SSAA will cost more memory and time.
 ### Terminal
 ```sh
-4x SSAA: On
-Application Set Up: 0.796825 seconds
-Shadow Passes:      0.849652 seconds
-Geometry Passes:    1.21359 seconds
-SSAO Passes:        8.33776 seconds
-Shading Pass:       9.41023 seconds
-SSR Pass:           11.018 seconds
-DownSampling:       11.4769 seconds
+4x SSAA: Off
+Application Set Up: 0.0924653 seconds
+Shadow Passes:      0.145654 seconds
+Geometry Passes:    0.170903 seconds
+SSAO Passes:        1.1425 seconds
+Shading Pass:       1.21045 seconds
+SSR Pass:           1.31 seconds
+FXAA Pass:          1.43453 seconds
 Done.
 ```
 
